@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +14,40 @@
       <h1 class="navbar-title">ThinkBoard</h1>
       <button class="btn btn-primary" onclick="showCreatePage()">
         <i class="fas fa-plus"></i>
-        <span>Yeni Not</span>
+        <span>New Note</span>
       </button>
     </div>
   </header>
+
+  <!-- Main Content Container -->
+  <div class="main-container">
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+      <div class="container">
+        <!-- Loading message -->
+        <div id="loadingMessage" class="loading-message" style="display: none;">
+          Loading notes...
+        </div>
+
+        <!-- Empty state -->
+        <div id="notesNotFound" class="notes-not-found" style="display: none;">
+          <div class="not-found-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <h3>No notes yet</h3>
+          <p>Ready to organize your thoughts? Start by creating your first note.</p>
+          <button class="btn btn-primary" onclick="showCreatePage()">
+            Create Your First Note
+          </button>
+        </div>
+
+        <!-- Notes grid -->
+        <div id="notesGrid" class="notes-grid" style="display: none;">
+          <!-- Notes will be added here -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- JS file -->
   <script src="script.js"></script>
