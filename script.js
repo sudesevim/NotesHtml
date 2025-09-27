@@ -1,6 +1,5 @@
 // script.js
 
-// Notes Management Application
 class NotesApp {
   constructor() {
     this.notes = this.loadNotes();
@@ -11,9 +10,10 @@ class NotesApp {
   init() {
     this.setupEventListeners();
     this.showHomePage();
+    this.renderNotes();
   }
 
-  // Local Storage Management
+  // Local Storage
   loadNotes() {
     const savedNotes = localStorage.getItem('thinkboard-notes');
     return savedNotes ? JSON.parse(savedNotes) : [];
@@ -23,12 +23,11 @@ class NotesApp {
     localStorage.setItem('thinkboard-notes', JSON.stringify(this.notes));
   }
 
-  // Generate unique ID
+  // Utility functions
   generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
-  // Format date for display
   formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -37,17 +36,81 @@ class NotesApp {
     });
   }
 
+  // Toast Notifications
+  showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+    toast.innerHTML = `
+      <div class="toast-content">
+        <i class="toast-icon ${icon}"></i>
+        <span class="toast-message">${message}</span>
+      </div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  // CRUD Operations
+  createNote(title, content) {
+    const newNote = {
+      id: this.generateId(),
+      title: title.trim(),
+      content: content.trim(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.notes.unshift(newNote);
+    this.saveNotes();
+    this.showToast("Note created successfully!");
+    this.showHomePage();
+  }
+
+  updateNote(noteId, title, content) {
+    const noteIndex = this.notes.findIndex(n => n.id === noteId);
+
+    if (noteIndex !== -1) {
+      this.notes[noteIndex] = {
+        ...this.notes[noteIndex],
+        title: title.trim(),
+        content: content.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      this.saveNotes();
+      this.showToast("Note updated successfully!");
+      this.showHomePage();
+    }
+  }
+
+  deleteNote(noteId) {
+    if (confirm("Are you sure you want to delete this note?")) {
+      this.notes = this.notes.filter(n => n.id !== noteId);
+      this.saveNotes();
+      this.showToast("Note deleted successfully!");
+      this.showHomePage();
+    }
+  }
+
   // Page Navigation
   showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
       page.classList.remove('active');
     });
-
     document.getElementById(pageId).classList.add('active');
   }
 
   showHomePage() {
     this.showPage('homePage');
+    this.renderNotes();
   }
 
   showCreatePage() {
@@ -55,28 +118,72 @@ class NotesApp {
     this.clearCreateForm();
   }
 
-  // Form Management
+  showNoteDetailPage(noteId) {
+    this.currentNoteId = noteId;
+    const note = this.notes.find(n => n.id === noteId);
+
+    if (note) {
+      document.getElementById('editNoteTitle').value = note.title;
+      document.getElementById('editNoteContent').value = note.content;
+      this.showPage('noteDetailPage');
+    }
+  }
+
+  // Form Handling
   clearCreateForm() {
     document.getElementById('noteTitle').value = '';
     document.getElementById('noteContent').value = '';
   }
 
-  // Event Listeners (placeholders for now)
+  // Event Listeners
   setupEventListeners() {
-    // Create note form
     document.getElementById('createNoteForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      console.log("Attempting to create a new note...");
+      this.handleCreateNote();
     });
 
-    // Save note button
-    document.getElementById('saveBtn')?.addEventListener('click', () => {
-      console.log("Attempting to save a note...");
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      this.handleSaveNote();
     });
   }
+
+  // Form Submission Handlers
+  handleCreateNote() {
+    const title = document.getElementById('noteTitle').value;
+    const content = document.getElementById('noteContent').value;
+
+    if (!title.trim() || !content.trim()) {
+      this.showToast("Please fill in all fields!", "error");
+      return;
+    }
+
+    this.createNote(title, content);
+  }
+
+  handleSaveNote() {
+    if (!this.currentNoteId) return;
+
+    const title = document.getElementById('editNoteTitle').value;
+    const content = document.getElementById('editNoteContent').value;
+
+    if (!title.trim() || !content.trim()) {
+      this.showToast("Please enter a title and content!", "error");
+      return;
+    }
+
+    this.updateNote(this.currentNoteId, title, content);
+  }
+
+  deleteCurrentNote() {
+    if (this.currentNoteId) {
+      this.deleteNote(this.currentNoteId);
+    }
+  }
+
+  // Note rendering will be added in the next step
 }
 
-// Global functions for HTML onclick events
+// Global functions
 function showHomePage() {
   app.showHomePage();
 }
@@ -85,7 +192,10 @@ function showCreatePage() {
   app.showCreatePage();
 }
 
-// Initialize the application
+function deleteCurrentNote() {
+  app.deleteCurrentNote();
+}
+
 let app;
 document.addEventListener('DOMContentLoaded', () => {
   app = new NotesApp();
