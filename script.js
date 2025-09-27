@@ -136,6 +136,58 @@ class NotesApp {
   }
 
   // Event Listeners
+  renderNotes() {
+    const notesGrid = document.getElementById('notesGrid');
+    const notesNotFound = document.getElementById('notesNotFound');
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    // Show loading
+    loadingMessage.style.display = 'block';
+    notesGrid.style.display = 'none';
+    notesNotFound.style.display = 'none';
+
+    setTimeout(() => {
+      loadingMessage.style.display = 'none';
+
+      if (this.notes.length === 0) {
+        notesNotFound.style.display = 'flex';
+      } else {
+        notesGrid.style.display = 'grid';
+        this.renderNotesGrid();
+      }
+    }, 500);
+  }
+
+  renderNotesGrid() {
+    const notesGrid = document.getElementById('notesGrid');
+
+    notesGrid.innerHTML = this.notes.map(note => `
+      <div class="note-card" onclick="app.showNoteDetailPage('${note.id}')">
+        <h3 class="note-card-title">${this.escapeHtml(note.title)}</h3>
+        <p class="note-card-content">${this.escapeHtml(note.content)}</p>
+        <div class="note-card-footer">
+          <span class="note-date">${this.formatDate(note.createdAt)}</span>
+          <div class="note-actions">
+            <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation(); app.showNoteDetailPage('${note.id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-ghost btn-xs text-error" onclick="event.stopPropagation(); app.deleteNote('${note.id}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Helpers
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Events
   setupEventListeners() {
     document.getElementById('createNoteForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -147,30 +199,25 @@ class NotesApp {
     });
   }
 
-  // Form Submission Handlers
+  // Handlers
   handleCreateNote() {
     const title = document.getElementById('noteTitle').value;
     const content = document.getElementById('noteContent').value;
-
     if (!title.trim() || !content.trim()) {
       this.showToast("Please fill in all fields!", "error");
       return;
     }
-
     this.createNote(title, content);
   }
 
   handleSaveNote() {
     if (!this.currentNoteId) return;
-
     const title = document.getElementById('editNoteTitle').value;
     const content = document.getElementById('editNoteContent').value;
-
     if (!title.trim() || !content.trim()) {
-      this.showToast("Please enter a title and content!", "error");
+      this.showToast("Please provide both title and content!", "error");
       return;
     }
-
     this.updateNote(this.currentNoteId, title, content);
   }
 
@@ -179,8 +226,6 @@ class NotesApp {
       this.deleteNote(this.currentNoteId);
     }
   }
-
-  // Note rendering will be added in the next step
 }
 
 // Global functions
@@ -199,4 +244,28 @@ function deleteCurrentNote() {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
   app = new NotesApp();
+
+  // Add sample notes (for first launch)
+  const savedNotes = localStorage.getItem('thinkboard-notes');
+  if (!savedNotes || JSON.parse(savedNotes).length === 0) {
+    const sampleNotes = [
+      {
+        id: 'sample1',
+        title: 'Welcome!',
+        content: 'Welcome to ThinkBoard note-taking app. You can delete or edit this sample note.',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'sample2',
+        title: 'How to use?',
+        content: 'Click the "New Note" button to create a new note. Click on existing notes to edit them. Use the trash icon to delete.',
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+    localStorage.setItem('thinkboard-notes', JSON.stringify(sampleNotes));
+    app.notes = sampleNotes;
+    app.renderNotes();
+  }
 });
