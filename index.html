@@ -24,26 +24,58 @@
     <!-- Home Page -->
     <div id="homePage" class="page active">
       <div class="container">
-        <!-- Loading message -->
         <div id="loadingMessage" class="loading-message" style="display: none;">
           Loading notes...
         </div>
 
-        <!-- Empty state -->
         <div id="notesNotFound" class="notes-not-found" style="display: none;">
           <div class="not-found-icon">
             <i class="fas fa-book"></i>
           </div>
           <h3>No notes yet</h3>
-          <p>Ready to organize your thoughts? Start by creating your first note.</p>
+          <p>Ready to organize your thoughts? Start your journey by creating your first note.</p>
           <button class="btn btn-primary" onclick="showCreatePage()">
             Create Your First Note
           </button>
         </div>
 
-        <!-- Notes grid -->
         <div id="notesGrid" class="notes-grid" style="display: none;">
-          <!-- Notes will be added here -->
+          <!-- Notes will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Page -->
+    <div id="createPage" class="page">
+      <div class="container">
+        <div class="page-header">
+          <button class="btn btn-ghost" onclick="showHomePage()">
+            <i class="fas fa-arrow-left"></i>
+            Back to Notes
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Create a New Note</h2>
+            <form id="createNoteForm">
+              <div class="form-group">
+                <label for="noteTitle">Title</label>
+                <input type="text" id="noteTitle" placeholder="Note title" required>
+              </div>
+
+              <div class="form-group">
+                <label for="noteContent">Content</label>
+                <textarea id="noteContent" placeholder="Write your note here..." rows="6" required></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="createBtn">
+                  <span id="createBtnText">Create Note</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
